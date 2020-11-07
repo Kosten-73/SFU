@@ -12,14 +12,14 @@ token = '1335509834:AAGQgd-fHs3YEyu5zcDiI3V1rQ9PLLxTUHk'
 bot = telebot.TeleBot(token)
 list_admins = [321354512, 914239664]  # Список id администраторов
 current_guests = []
-conn = sqlite3.connect("schedule_database.ds")
-cursor = conn.cursor()
-#cursor.execute("DROP TABLE schedule")
-cursor.execute("CREATE TABLE IF NOT EXISTS Schedule ("
-               "CabinetNum int NOT NULL,"
-               "QueryNum int NOT NULL,"
-               "GuestNum int NOT NULL)")
-conn.commit()
+# conn = sqlite3.connect("schedule_database.ds")
+# cursor = conn.cursor()
+# #cursor.execute("DROP TABLE schedule")
+# cursor.execute("CREATE TABLE IF NOT EXISTS Schedule ("
+#                "CabinetNum int NOT NULL,"
+#                "QueryNum int NOT NULL,"
+#                "GuestNum int NOT NULL)")
+# conn.commit()
 schedule = []
 # Состояния пользователей, привязанные к id
 # work - ждёт какой-то команды
@@ -84,6 +84,7 @@ def start_work(message: Message):
     button_hi3 = types.ReplyKeyboardMarkup(resize_keyboard=True)
     button_hi3.add(btn_my_site2, btn_my_site1)
     # button_hi3.add(btn_my_site1)
+    global users_states
 
     if message.from_user.id not in users_states:
         users_states[int(message.from_user.id)] = "work"
@@ -110,6 +111,8 @@ def start_work(message: Message):
 @bot.message_handler(commands=['make_schedule'])
 def make_schedule(message: Message):
     #admin_notification(message)
+    global users_states
+
     users_states[int(message.from_user.id)] = "wait_schedule"
     answer = "Введите через запятую количество кабинетов и интервалов для приёма \n" \
              "/cancel для выхода из этого меню \n" \
@@ -123,29 +126,38 @@ def make_schedule(message: Message):
 def set_schedule(message: Message):
     #admin_notification(message)
     params = message.text.split(',')
-    if ((int(params[0]) > 0) and (int(params[1]) > 0)) :
-        cab = ['Не занято'] * int(params[1])
-        global schedule
-        schedule = [cab] * int(params[0])
-        users_states[int(message.from_user.id)] = "work"
-        result = list()
-        print(result)
-        for i in range(0, int(params[0])):
-            row = list()
-            for j in range(0, int(params[1])):
-                row.append(f'({i + 1},{j + 1},0)')
-            result.append(','.join(row))
-        print(result)
-        with sqlite3.connect("schedule_database.ds") as conn:
-            cursor = conn.cursor()
-            query = f'INSERT INTO Schedule VALUES {",".join(result)};'
-            print(query)
-            cursor.execute(query)
-            conn.commit()
-        answer = f'Расписание имеет размеры {len(schedule)}x{len(schedule[0])}'
+    global users_states
+
+    if int(message.from_user.id) in users_states:
+        if (users_states[int(message.from_user.id)] == "wait_schedule"):
+            if ((int(params[0]) > 0) and (int(params[1]) > 0)) :
+                cab = ['Не занято'] * int(params[1])
+                global schedule
+                schedule = [cab] * int(params[0])
+                users_states[int(message.from_user.id)] = "work"
+                result = list()
+                print(result)
+                for i in range(0, int(params[0])):
+                    row = list()
+                    for j in range(0, int(params[1])):
+                        row.append(f'({i + 1},{j + 1},0)')
+                    result.append(','.join(row))
+                print(result)
+                # with sqlite3.connect("schedule_database.ds") as conn:
+                #     cursor = conn.cursor()
+                #     query = f'INSERT INTO Schedule VALUES {",".join(result)};'
+                #     print(query)
+                #     cursor.execute(query)
+                #     conn.commit()
+                answer = f'Расписание имеет размеры {len(schedule)}x{len(schedule[0])}'
+            else:
+                users_states[int(message.from_user.id)] = "work"
+                answer = f"Расписание не может иметь размеры {params[0]}x{params[1]}\n" \
+                         f"Изменения не применены"
+        else:
+            answer = "Некорректная команда"
     else:
-        answer = f"Расписание не может иметь размеры {params[0]}x{params[1]}\n" \
-                 f"Изменения не применены"
+        answer = "Некорректная команда"
     admin_notification(message, answer)
     bot.send_message(message.from_user.id, answer)
 
@@ -169,6 +181,8 @@ def show_schedule(message: Message):
 
 @bot.message_handler(commands=['clean_schedule'])
 def clean_validation(message: Message):
+    global users_states
+
     users_states[int(message.from_user.id)] = "wait_clean"
     answer = "/clean - Подтвердить удаление\n" \
              "/cancel - Отменить операцию"
@@ -179,6 +193,8 @@ def clean_validation(message: Message):
 @bot.message_handler(commands=['clean'])
 def clean_schedule_manual(message: Message):
     clean_schedule()
+    global users_states
+
     users_states[int(message.from_user.id)] = "work"
     answer = "Сетка расписания сброшена"
     admin_notification(message, answer)
