@@ -525,7 +525,7 @@ bot.enable_save_next_step_handlers(delay=2)
 
 bot.load_next_step_handlers()
 
-bot.skip_pending = True
+# bot.skip_pending = True
 
 
 def working_bot():
