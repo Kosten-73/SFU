@@ -92,7 +92,9 @@ class Cabinet:
 
 class Schedule:
     def __init__(self):
-        self.admins_id = {321354512, 914239664, 207236087, 148089535, 171422790}
+        self.admins_id = {321354512, 914239664
+                         # 207236087, 148089535, 171422790
+                         }
         self.cabinets = dict()
         self.authorized_guests = dict()
         self.authorized_workers = dict()
