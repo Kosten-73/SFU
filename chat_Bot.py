@@ -27,8 +27,8 @@ dict_id_user2 = dict()
 dict_id_worker1 = dict()
 dict_id_worker2 = dict()
 
-fl = '1335509834:AAGrGBrUn8l9NTm8IfN5X2AvrgVQ-whkf98'
-token = '1335509834:AAGrGBrUn8l9NTm8IfN5X2AvrgVQ-whkf98'
+fl = open('token.txt')
+token = fl
 bot = telebot.TeleBot(token)
 # list_admins = [321354512, 914239664]  # Список id администраторов
 #
@@ -247,7 +247,7 @@ def notify_all(lt):
             # print(1)
             bot.send_message(dict_id_user2[now], 'Ваше положение в очереди изменилось')
 
-            
+
 @bot.message_handler(content_types=['text'])
 def text_parse(message: Message):
     """
