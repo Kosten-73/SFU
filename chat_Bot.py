@@ -330,16 +330,16 @@ def text_parse(message: Message):
 
 
 # Здесь объявляю для того, чтобы цикличного импорта не было
-# import cleaner
-#
-# threading.Thread(target=cleaner.delete).start()
-#
-# bot.enable_save_next_step_handlers(delay=2)
-#
-# bot.load_next_step_handlers()
+import cleaner
+
+threading.Thread(target=cleaner.delete).start()
+
+bot.enable_save_next_step_handlers(delay=2)
+
+bot.load_next_step_handlers()
 
 
-# bot.skip_pending = True
+bot.skip_pending = True
 
 def working_bot():
     global bot
